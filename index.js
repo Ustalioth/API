@@ -35,7 +35,7 @@ app.post("/user", (req, res) => {
   }
 
   if (users.push(newUser)) {
-    fs.writeFile("./MOCK_DATA.json", JSON.stringify(users), (err) => {
+    fs.writeFile("./users.json", JSON.stringify(users), (err) => {
       if (err) throw err;
       res.status(200).send(newUser);
     });
@@ -54,15 +54,6 @@ app.get("/user/:id", (req, res) => {
   } else {
     res.status(500).send("User not found");
   }
-  // const { logo } = req.body;
-
-  // if (!logo) {
-  //   res.status(418).send({ message: "We need a logo!" });
-  // }
-
-  // res.send({
-  //   tshirt: `👕 with your ${logo} and ID of ${id}`,
-  // });
 });
 
 app.delete("/user/delete/:id", (req, res) => {
@@ -72,7 +63,7 @@ app.delete("/user/delete/:id", (req, res) => {
 
   if (user != undefined) {
     if (users.splice(users.indexOf(user), 1)) {
-      fs.writeFile("./MOCK_DATA.json", JSON.stringify(users), (err) => {
+      fs.writeFile("./users.json", JSON.stringify(users), (err) => {
         if (err) throw err;
         res.status(200).send("User deleted");
       });
@@ -83,8 +74,6 @@ app.delete("/user/delete/:id", (req, res) => {
 app.patch("/user/patch/:id", (req, res) => {
   const { id } = req.params;
   const body = req.body;
-
-  console.log(body);
 
   let user = users.find((user) => user.id == id);
 
@@ -98,7 +87,7 @@ app.patch("/user/patch/:id", (req, res) => {
       user[key] = req.body[key];
     });
 
-    fs.writeFile("./MOCK_DATA.json", JSON.stringify(users), (err) => {
+    fs.writeFile("./users.json", JSON.stringify(users), (err) => {
       if (err) throw err;
       //res.status(200).send("User updated");
     });
@@ -107,6 +96,38 @@ app.patch("/user/patch/:id", (req, res) => {
   }
 
   res.status(200).send("User not found");
+});
+
+app.get("/product/:amount", (req, res) => {
+  const { amount } = req.params;
+
+  res.status(200).send(products.slice(0, amount));
+});
+
+app.post("/product", (req, res) => {
+  let newProduct = req.body;
+  newProduct.id =
+    Math.max.apply(
+      null,
+      users.map((s) => +s.id)
+    ) + 1;
+
+  if (
+    newProduct.name == "" ||
+    newProduct.name == undefined ||
+    newProduct.name == null
+  ) {
+    res.status(500).send("name must be defined");
+  }
+
+  if (products.push(newProduct)) {
+    fs.writeFile("./products.json", JSON.stringify(products), (err) => {
+      if (err) throw err;
+      res.status(200).send(newProduct);
+    });
+  } else {
+    res.status(500).send("Product not inserted");
+  }
 });
 
 app.listen(PORT, () => console.log(`it's alive on http://localhost:${PORT}`));
